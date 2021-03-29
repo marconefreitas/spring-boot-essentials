@@ -1,8 +1,8 @@
-version: '3.1'
+version: '2.4'
 x-database-variables: &database-variables
   SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/anime?useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
   SPRING_DATASOURCE_USERNAME : root
-  SPRING_DATASOURCE_PASSWORD: root
+  SPRING_DATASOURCE_PASSWORD: senha123
 services:
   db:
     image: mysql
@@ -20,8 +20,7 @@ services:
     container_name: prometheus
     volumes:
     - "./src/main/resources/prometheus.yml:/etc/prometheus/prometheus.yml"
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+    command: "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
 
@@ -33,14 +32,19 @@ services:
     volumes:
     - ./data/grafana:/var/lib/grafana
 
-#  springboot-essentials:
-#
-#    image: registry.hub.docker.com/marconefreitas/springboot-essentials:0.0.1-SNAPSHOT
-#    ports:
-     environment:
+
+  springboot-essentials:
+    image: marconefreitas/springboot-essentials:0.0.1-SNAPSHOT
+    container_name: springboot-essentials
+    depends_on:
+      - db
+      - prometheus
+      - grafana
+    build:
+      context: .
+    environment:
        <<: *database-variables
-#    - "8080:8080"
-
-
+    ports:
+       - "8080:8080"
 volumes:
   devdojo_data:
